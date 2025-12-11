@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Class Scheduler | KoreanLearnin</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Press Start 2P', cursive; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); min-height: 100vh; padding: 20px; color: #fff; font-size: 10px; }
@@ -140,6 +141,40 @@
         .history-present { color: #39ff14; }
         .history-late { color: #ffff00; }
         .history-absent { color: #ff3366; }
+        
+        /* Rich Text Editor Styles */
+        .rich-text-toolbar { display: flex; flex-wrap: wrap; gap: 5px; padding: 8px; background: #1a1a2e; border: 2px solid #333; border-bottom: none; border-radius: 8px 8px 0 0; }
+        .rich-text-toolbar button { background: #333; border: 1px solid #555; color: #fff; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-family: 'Noto Sans', sans-serif; min-width: 32px; }
+        .rich-text-toolbar button:hover { background: #444; border-color: #00ffff; }
+        .rich-text-toolbar button.active { background: #00ffff; color: #000; }
+        .rich-text-toolbar input[type="color"] { width: 32px; height: 28px; border: 1px solid #555; border-radius: 4px; cursor: pointer; background: #333; padding: 2px; }
+        .rich-text-toolbar .toolbar-divider { width: 1px; background: #555; margin: 0 5px; }
+        .rich-text-editor { min-height: 200px; padding: 15px; background: #0a0a15; border: 2px solid #333; border-radius: 0 0 8px 8px; color: #fff; font-family: 'Noto Sans', sans-serif; font-size: 14px; line-height: 1.8; outline: none; overflow-y: auto; }
+        .rich-text-editor:focus { border-color: #00ffff; }
+        .rich-text-editor ul, .rich-text-editor ol { margin: 10px 0; padding-left: 25px; }
+        .rich-text-editor li { margin: 5px 0; }
+        
+        /* Presentation Mode Styles */
+        .presentation-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 10000; display: flex; flex-direction: column; }
+        .presentation-toolbar { display: flex; gap: 10px; padding: 10px 20px; background: #1a1a2e; border-bottom: 2px solid #333; align-items: center; flex-wrap: wrap; }
+        .presentation-toolbar button { background: #333; border: 2px solid #555; color: #fff; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 12px; font-family: 'Press Start 2P', cursive; transition: all 0.2s; }
+        .presentation-toolbar button:hover { border-color: #00ffff; background: #444; }
+        .presentation-toolbar button.active { background: #00ffff; color: #000; border-color: #00ffff; }
+        .presentation-toolbar .tool-group { display: flex; gap: 5px; padding: 0 10px; border-right: 1px solid #555; }
+        .presentation-toolbar .tool-group:last-child { border-right: none; }
+        .presentation-toolbar input[type="range"] { width: 80px; }
+        .presentation-toolbar input[type="color"] { width: 35px; height: 35px; border: 2px solid #555; border-radius: 4px; cursor: pointer; }
+        .presentation-content { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        .presentation-image { max-width: 90%; max-height: 85vh; object-fit: contain; user-select: none; -webkit-user-drag: none; }
+        .presentation-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: crosshair; }
+        .presentation-close { position: absolute; top: 10px; right: 20px; background: #ff3366; border: none; color: #fff; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-family: 'Press Start 2P', cursive; font-size: 10px; z-index: 10001; }
+        .presentation-close:hover { background: #ff1744; }
+        .clickable-media { cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
+        .clickable-media:hover { border-color: #00ffff; box-shadow: 0 0 15px rgba(0,255,255,0.5); }
+        
+        /* Rainbow cursor animation */
+        @keyframes rainbow-cursor { 0% { background: #ff0000; } 16% { background: #ff8800; } 33% { background: #ffff00; } 50% { background: #00ff00; } 66% { background: #0088ff; } 83% { background: #8800ff; } 100% { background: #ff0000; } }
+        .rainbow-draw { animation: rainbow-cursor 2s linear infinite; }
         
         /* Schedule Calendar Styles */
         .schedule-grid { display: grid; grid-template-columns: 100px repeat(2, 1fr); gap: 2px; background: #333; border: 2px solid #00ffff; border-radius: 8px; overflow: hidden; }
@@ -822,13 +857,29 @@
                 <div id="adminTabMaterials" class="tab-content">
                     <div class="card">
                         <h3>📖 Teaching Materials</h3>
-                        <div class="form-group"><label>Select Level</label>
-                            <select id="materialLevelSelect" onchange="loadMaterialsForLevel()">
-                                <option value="absolute">Absolute Beginner</option>
-                                <option value="novice">Novice</option>
-                                <option value="beginner">Beginner</option>
-                                <option value="advanced">Advanced Beginner</option>
-                            </select>
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label>Select Level</label>
+                                <select id="materialLevelSelect" onchange="loadMaterialsForLevel()">
+                                    <option value="all">📚 All Levels</option>
+                                    <option value="absolute">Absolute Beginner</option>
+                                    <option value="novice">Novice</option>
+                                    <option value="beginner">Beginner</option>
+                                    <option value="advanced">Advanced Beginner</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label>Select Week</label>
+                                <select id="materialWeekSelect" onchange="loadMaterialsForLevel()">
+                                    <option value="all">📅 All Weeks</option>
+                                    <option value="1">Week 1</option>
+                                    <option value="2">Week 2</option>
+                                    <option value="3">Week 3</option>
+                                    <option value="4">Week 4</option>
+                                    <option value="5">Week 5</option>
+                                    <option value="6">Week 6</option>
+                                </select>
+                            </div>
                         </div>
                         <div style="margin-bottom: 15px;">
                             <button class="btn btn-sm btn-primary" onclick="addMaterialBlock('text')">📝 Text</button>
@@ -836,7 +887,7 @@
                             <button class="btn btn-sm btn-success" onclick="addMaterialBlock('image')">🖼️ Image</button>
                             <button class="btn btn-sm btn-warning" onclick="addMaterialBlock('file')">📁 File</button>
                         </div>
-                        <div id="materialsContainer"><p style="color: #888; font-size: 8px;">No materials yet.</p></div>
+                        <div id="materialsContainer"><p style="color: #888; font-size: 10px; font-family: 'Noto Sans', sans-serif;">No materials yet.</p></div>
                     </div>
                 </div>
 
@@ -959,15 +1010,31 @@
                 <div id="teacherTabMaterials" class="tab-content">
                     <div class="card">
                         <h3>📖 Teaching Materials</h3>
-                        <div class="form-group"><label>Select Level</label>
-                            <select id="teacherMaterialLevel" onchange="loadTeacherMaterials()">
-                                <option value="absolute">Absolute Beginner</option>
-                                <option value="novice">Novice</option>
-                                <option value="beginner">Beginner</option>
-                                <option value="advanced">Advanced Beginner</option>
-                            </select>
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label>Select Level</label>
+                                <select id="teacherMaterialLevel" onchange="loadTeacherMaterials()">
+                                    <option value="all">📚 All Levels</option>
+                                    <option value="absolute">Absolute Beginner</option>
+                                    <option value="novice">Novice</option>
+                                    <option value="beginner">Beginner</option>
+                                    <option value="advanced">Advanced Beginner</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label>Select Week</label>
+                                <select id="teacherMaterialWeek" onchange="loadTeacherMaterials()">
+                                    <option value="all">📅 All Weeks</option>
+                                    <option value="1">Week 1</option>
+                                    <option value="2">Week 2</option>
+                                    <option value="3">Week 3</option>
+                                    <option value="4">Week 4</option>
+                                    <option value="5">Week 5</option>
+                                    <option value="6">Week 6</option>
+                                </select>
+                            </div>
                         </div>
-                        <div id="teacherMaterialsDisplay"><p style="color: #888; font-size: 8px;">Select a level.</p></div>
+                        <div id="teacherMaterialsDisplay"><p style="color: #888; font-size: 10px; font-family: 'Noto Sans', sans-serif;">Select a level and week to view materials.</p></div>
                     </div>
                 </div>
                 
@@ -2654,21 +2721,42 @@
         // Materials (simplified)
         async function loadMaterialsForLevel() {
             const level = document.getElementById('materialLevelSelect').value;
+            const week = document.getElementById('materialWeekSelect').value;
             try {
-                const snap = await db.collection('scheduler_materials').where('level', '==', level).orderBy('order').get();
-                const materials = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                let snap = await db.collection('scheduler_materials').get();
+                let materials = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                
+                // Filter by level
+                if (level !== 'all') {
+                    materials = materials.filter(m => m.level === level);
+                }
+                
+                // Filter by week
+                if (week !== 'all') {
+                    materials = materials.filter(m => m.week === week || m.week === parseInt(week));
+                }
+                
+                materials.sort((a, b) => (a.order || 0) - (b.order || 0));
                 renderMaterials(materials);
             } catch (e) {
-                document.getElementById('materialsContainer').innerHTML = '<p style="color: #888; font-size: 8px;">No materials yet.</p>';
+                console.error('Error loading materials:', e);
+                document.getElementById('materialsContainer').innerHTML = `<p style="color: #ff3366; font-size: 8px;">Error loading materials: ${e.message}</p>`;
             }
         }
 
         function renderMaterials(materials) {
             const container = document.getElementById('materialsContainer');
-            if (materials.length === 0) { container.innerHTML = '<p style="color: #888; font-size: 8px;">No materials yet.</p>'; return; }
+            const showingAllLevels = document.getElementById('materialLevelSelect').value === 'all';
+            const showingAllWeeks = document.getElementById('materialWeekSelect').value === 'all';
+            if (materials.length === 0) { container.innerHTML = '<p style="color: #888; font-size: 10px; font-family: Noto Sans, sans-serif;">No materials for this selection.</p>'; return; }
             container.innerHTML = materials.map(m => `
                 <div class="material-block">
-                    <div class="material-header"><span class="material-type">${m.type}</span>
+                    <div class="material-header">
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <span class="material-type">${m.type}</span>
+                            ${showingAllLevels ? `<span class="level-badge level-${m.level}" style="font-size: 6px; padding: 2px 6px;">${LEVELS[m.level] || m.level}</span>` : ''}
+                            ${showingAllWeeks ? `<span style="font-size: 6px; background: #333; color: #ffff00; padding: 2px 6px; border-radius: 4px;">W${m.week || '?'}</span>` : ''}
+                        </div>
                         <div><button class="btn btn-sm btn-info" onclick="editMaterial('${m.id}')">✏️</button><button class="btn btn-sm btn-danger" onclick="deleteMaterial('${m.id}')">🗑️</button></div>
                     </div>
                     <div class="material-content">${renderMaterialContent(m)}</div>
@@ -2677,10 +2765,11 @@
         }
 
         function renderMaterialContent(m) {
-            if (m.type === 'text') return `<div>${m.content}</div>`;
-            if (m.type === 'link') return `<a href="${m.url}" target="_blank">${m.title || m.url}</a>`;
-            if (m.type === 'image') return `<img src="${m.url}" alt="">`;
-            if (m.type === 'file') return `<a href="${m.url}" download>📁 ${m.filename || 'Download'}</a>`;
+            const fontStyle = "font-family: 'Noto Sans', sans-serif; font-size: 12px; line-height: 1.6;";
+            if (m.type === 'text') return `<div style="${fontStyle}">${m.content || ''}</div>`;
+            if (m.type === 'link') return `<a href="${m.url}" target="_blank" style="${fontStyle} color: #00ffff;">${m.title || m.url}</a>`;
+            if (m.type === 'image') return `<img src="${m.url}" alt="" style="max-width: 100%; border-radius: 4px;">`;
+            if (m.type === 'file') return `<a href="${m.url}" download style="${fontStyle} color: #ffff00;">📁 ${m.filename || 'Download'}</a>`;
             return '';
         }
 
@@ -2690,23 +2779,200 @@
             document.getElementById('materialModalTitle').textContent = `Add ${type.charAt(0).toUpperCase() + type.slice(1)}`;
             const form = document.getElementById('materialFormContainer');
 
-            if (type === 'text') form.innerHTML = '<div class="form-group"><label>Content</label><textarea id="materialContent" rows="5" placeholder="Enter text..."></textarea></div>';
+            if (type === 'text') {
+                form.innerHTML = `
+                    <div class="form-group">
+                        <label>Content</label>
+                        <div class="rich-text-toolbar">
+                            <button type="button" onclick="execRichCmd('bold')" title="Bold"><b>B</b></button>
+                            <button type="button" onclick="execRichCmd('italic')" title="Italic"><i>I</i></button>
+                            <button type="button" onclick="execRichCmd('underline')" title="Underline"><u>U</u></button>
+                            <div class="toolbar-divider"></div>
+                            <input type="color" id="textColorPicker" value="#ffffff" onchange="execRichCmd('foreColor', this.value)" title="Text Color">
+                            <input type="color" id="bgColorPicker" value="#000000" onchange="execRichCmd('hiliteColor', this.value)" title="Highlight Color">
+                            <div class="toolbar-divider"></div>
+                            <button type="button" onclick="execRichCmd('insertUnorderedList')" title="Bullet List">• List</button>
+                            <button type="button" onclick="execRichCmd('insertOrderedList')" title="Numbered List">1. List</button>
+                            <div class="toolbar-divider"></div>
+                            <button type="button" onclick="execRichCmd('fontSize', '3')" title="Normal Size">A</button>
+                            <button type="button" onclick="execRichCmd('fontSize', '5')" title="Large Size" style="font-size: 16px;">A</button>
+                            <div class="toolbar-divider"></div>
+                            <button type="button" onclick="triggerEditorFileUpload('image')" title="Insert Image">🖼️</button>
+                            <button type="button" onclick="triggerEditorFileUpload('audio')" title="Insert Audio">🔊</button>
+                            <button type="button" onclick="triggerEditorFileUpload('file')" title="Insert File">📎</button>
+                            <div class="toolbar-divider"></div>
+                            <button type="button" onclick="execRichCmd('removeFormat')" title="Clear Formatting">✕</button>
+                        </div>
+                        <div id="richTextEditor" class="rich-text-editor" contenteditable="true" 
+                            ondragover="handleEditorDragOver(event)" 
+                            ondrop="handleEditorDrop(event)"
+                            ondragleave="handleEditorDragLeave(event)"></div>
+                        <input type="file" id="editorFileInput" style="display: none;" onchange="handleEditorFileSelect(event)">
+                        <p style="font-size: 7px; color: #888; margin-top: 5px;">💡 Tip: You can drag & drop images directly into the editor</p>
+                    </div>
+                `;
+            }
             else if (type === 'link') form.innerHTML = '<div class="form-group"><label>URL</label><input type="url" id="materialUrl" placeholder="https://..."></div><div class="form-group"><label>Title</label><input type="text" id="materialTitle" placeholder="Link title"></div>';
-            else if (type === 'image') form.innerHTML = '<div class="form-group"><label>Image URL</label><input type="url" id="materialUrl" placeholder="https://..."></div><div class="form-group"><label>Caption</label><input type="text" id="materialCaption" placeholder="Caption"></div>';
-            else if (type === 'file') form.innerHTML = '<div class="form-group"><label>File URL</label><input type="url" id="materialUrl" placeholder="https://..."></div><div class="form-group"><label>Filename</label><input type="text" id="materialFilename" placeholder="document.pdf"></div>';
+            else if (type === 'image') form.innerHTML = `
+                <div class="form-group">
+                    <label>Upload Image or Enter URL</label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <button type="button" class="btn btn-sm btn-info" onclick="document.getElementById('imageFileInput').click()">📤 Upload Image</button>
+                        <span style="color: #888; font-size: 8px; align-self: center;">or paste URL below</span>
+                    </div>
+                    <input type="file" id="imageFileInput" accept="image/*" style="display: none;" onchange="handleMaterialFileUpload(event, 'image')">
+                    <input type="url" id="materialUrl" placeholder="https://...">
+                    <div id="imagePreview" style="margin-top: 10px;"></div>
+                </div>
+                <div class="form-group"><label>Caption</label><input type="text" id="materialCaption" placeholder="Caption"></div>`;
+            else if (type === 'file') form.innerHTML = `
+                <div class="form-group">
+                    <label>Upload File or Enter URL</label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <button type="button" class="btn btn-sm btn-info" onclick="document.getElementById('fileFileInput').click()">📤 Upload File</button>
+                        <span style="color: #888; font-size: 8px; align-self: center;">or paste URL below</span>
+                    </div>
+                    <input type="file" id="fileFileInput" style="display: none;" onchange="handleMaterialFileUpload(event, 'file')">
+                    <input type="url" id="materialUrl" placeholder="https://...">
+                    <div id="uploadProgress" style="margin-top: 10px;"></div>
+                </div>
+                <div class="form-group"><label>Display Name</label><input type="text" id="materialFilename" placeholder="document.pdf"></div>`;
 
             document.getElementById('materialModal').classList.add('active');
+        }
+        
+        let currentEditorUploadType = 'image';
+        
+        function triggerEditorFileUpload(type) {
+            currentEditorUploadType = type;
+            const input = document.getElementById('editorFileInput');
+            if (type === 'image') input.accept = 'image/*';
+            else if (type === 'audio') input.accept = 'audio/*';
+            else input.accept = '*/*';
+            input.click();
+        }
+        
+        async function handleEditorFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            await uploadAndInsertFile(file, currentEditorUploadType);
+            event.target.value = '';
+        }
+        
+        function handleEditorDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.style.borderColor = '#39ff14';
+            event.currentTarget.style.background = 'rgba(57, 255, 20, 0.1)';
+        }
+        
+        function handleEditorDragLeave(event) {
+            event.currentTarget.style.borderColor = '#333';
+            event.currentTarget.style.background = '#0a0a15';
+        }
+        
+        async function handleEditorDrop(event) {
+            event.preventDefault();
+            event.currentTarget.style.borderColor = '#333';
+            event.currentTarget.style.background = '#0a0a15';
+            
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                const file = files[0];
+                const type = file.type.startsWith('image/') ? 'image' : 
+                             file.type.startsWith('audio/') ? 'audio' : 'file';
+                await uploadAndInsertFile(file, type);
+            }
+        }
+        
+        async function uploadAndInsertFile(file, type) {
+            const editor = document.getElementById('richTextEditor');
+            const statusDiv = document.createElement('div');
+            statusDiv.style.cssText = 'color: #ffff00; font-size: 10px; padding: 5px;';
+            statusDiv.textContent = `Uploading ${file.name}...`;
+            editor.appendChild(statusDiv);
+            
+            try {
+                const filename = `materials/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+                const storageRef = firebase.storage().ref().child(filename);
+                const snapshot = await storageRef.put(file);
+                const url = await snapshot.ref.getDownloadURL();
+                
+                statusDiv.remove();
+                
+                if (type === 'image') {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.style.cssText = 'max-width: 100%; border-radius: 4px; margin: 10px 0;';
+                    editor.appendChild(img);
+                } else if (type === 'audio') {
+                    const audio = document.createElement('audio');
+                    audio.src = url;
+                    audio.controls = true;
+                    audio.style.cssText = 'width: 100%; margin: 10px 0;';
+                    editor.appendChild(audio);
+                } else {
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = file.name;
+                    link.textContent = `📁 ${file.name}`;
+                    link.style.cssText = 'color: #00ffff; display: block; margin: 10px 0;';
+                    editor.appendChild(link);
+                }
+                
+                editor.appendChild(document.createElement('br'));
+                editor.focus();
+            } catch (e) {
+                statusDiv.textContent = `Error: ${e.message}`;
+                statusDiv.style.color = '#ff3366';
+                console.error('Upload error:', e);
+            }
+        }
+        
+        async function handleMaterialFileUpload(event, type) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const progressDiv = document.getElementById(type === 'image' ? 'imagePreview' : 'uploadProgress');
+            progressDiv.innerHTML = `<p style="color: #ffff00; font-size: 8px;">Uploading ${file.name}...</p>`;
+            
+            try {
+                const filename = `materials/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+                const storageRef = firebase.storage().ref().child(filename);
+                const snapshot = await storageRef.put(file);
+                const url = await snapshot.ref.getDownloadURL();
+                
+                document.getElementById('materialUrl').value = url;
+                
+                if (type === 'image') {
+                    progressDiv.innerHTML = `<img src="${url}" style="max-width: 200px; border-radius: 4px; border: 2px solid #39ff14;"><p style="color: #39ff14; font-size: 8px;">✓ Image uploaded!</p>`;
+                } else {
+                    document.getElementById('materialFilename').value = file.name;
+                    progressDiv.innerHTML = `<p style="color: #39ff14; font-size: 8px;">✓ File uploaded: ${file.name}</p>`;
+                }
+            } catch (e) {
+                progressDiv.innerHTML = `<p style="color: #ff3366; font-size: 8px;">Error: ${e.message}</p>`;
+                console.error('Upload error:', e);
+            }
+        }
+        
+        function execRichCmd(command, value = null) {
+            document.execCommand(command, false, value);
+            document.getElementById('richTextEditor').focus();
         }
 
         function closeMaterialModal() { document.getElementById('materialModal').classList.remove('active'); }
 
         async function saveMaterial() {
             const type = document.getElementById('editingMaterialType').value;
-            const level = document.getElementById('materialLevelSelect').value;
+            const level = document.getElementById('materialLevelSelect').value === 'all' ? 'absolute' : document.getElementById('materialLevelSelect').value;
+            const week = document.getElementById('materialWeekSelect').value === 'all' ? '1' : document.getElementById('materialWeekSelect').value;
             const id = document.getElementById('editingMaterialId').value;
 
-            const data = { type, level, order: Date.now() };
-            if (type === 'text') data.content = document.getElementById('materialContent').value;
+            const data = { type, level, week: parseInt(week), order: Date.now() };
+            if (type === 'text') {
+                const editor = document.getElementById('richTextEditor');
+                data.content = editor ? editor.innerHTML : '';
+            }
             else if (type === 'link') { data.url = document.getElementById('materialUrl').value; data.title = document.getElementById('materialTitle').value; }
             else if (type === 'image') { data.url = document.getElementById('materialUrl').value; data.caption = document.getElementById('materialCaption')?.value; }
             else if (type === 'file') { data.url = document.getElementById('materialUrl').value; data.filename = document.getElementById('materialFilename').value; }
@@ -2716,6 +2982,7 @@
                 else await db.collection('scheduler_materials').add(data);
                 closeMaterialModal();
                 loadMaterialsForLevel();
+                alert(`✅ Material saved successfully to ${LEVELS[level] || level} - Week ${week}!`);
             } catch (e) { showMessage('materialModalMessage', 'Error: ' + e.message, 'error'); }
         }
 
@@ -2726,7 +2993,10 @@
             document.getElementById('editingMaterialId').value = id;
             addMaterialBlock(m.type);
             setTimeout(() => {
-                if (m.type === 'text') document.getElementById('materialContent').value = m.content || '';
+                if (m.type === 'text') {
+                    const editor = document.getElementById('richTextEditor');
+                    if (editor) editor.innerHTML = m.content || '';
+                }
                 else if (m.type === 'link') { document.getElementById('materialUrl').value = m.url || ''; document.getElementById('materialTitle').value = m.title || ''; }
                 else if (m.type === 'image') { document.getElementById('materialUrl').value = m.url || ''; if (document.getElementById('materialCaption')) document.getElementById('materialCaption').value = m.caption || ''; }
                 else if (m.type === 'file') { document.getElementById('materialUrl').value = m.url || ''; document.getElementById('materialFilename').value = m.filename || ''; }
@@ -2742,13 +3012,350 @@
         // Teacher Materials
         async function loadTeacherMaterials() {
             const level = document.getElementById('teacherMaterialLevel').value;
+            const week = document.getElementById('teacherMaterialWeek').value;
             try {
-                const snap = await db.collection('scheduler_materials').where('level', '==', level).orderBy('order').get();
-                const materials = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                let snap = await db.collection('scheduler_materials').get();
+                let materials = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                
+                // Filter by level
+                if (level !== 'all') {
+                    materials = materials.filter(m => m.level === level);
+                }
+                
+                // Filter by week
+                if (week !== 'all') {
+                    materials = materials.filter(m => m.week === week || m.week === parseInt(week));
+                }
+                
+                materials.sort((a, b) => (a.order || 0) - (b.order || 0));
+                
                 const container = document.getElementById('teacherMaterialsDisplay');
-                if (materials.length === 0) { container.innerHTML = '<p style="color: #888; font-size: 8px;">No materials.</p>'; return; }
-                container.innerHTML = materials.map(m => `<div class="material-block"><div class="material-header"><span class="material-type">${m.type}</span></div><div class="material-content">${renderMaterialContent(m)}</div></div>`).join('');
-            } catch (e) { document.getElementById('teacherMaterialsDisplay').innerHTML = '<p style="color: #888; font-size: 8px;">No materials.</p>'; }
+                const showingAllLevels = level === 'all';
+                const showingAllWeeks = week === 'all';
+                
+                if (materials.length === 0) { 
+                    container.innerHTML = '<p style="color: #888; font-size: 10px; font-family: Noto Sans, sans-serif;">No materials for this selection.</p>'; 
+                    return; 
+                }
+                container.innerHTML = materials.map(m => `
+                    <div class="material-block">
+                        <div class="material-header">
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <span class="material-type">${m.type}</span>
+                                ${showingAllLevels ? `<span class="level-badge level-${m.level}" style="font-size: 6px; padding: 2px 6px;">${LEVELS[m.level] || m.level}</span>` : ''}
+                                ${showingAllWeeks ? `<span style="font-size: 6px; background: #333; color: #ffff00; padding: 2px 6px; border-radius: 4px;">W${m.week || '?'}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="material-content">${renderMaterialContent(m)}</div>
+                    </div>
+                `).join('');
+            } catch (e) { 
+                console.error('Error loading teacher materials:', e);
+                document.getElementById('teacherMaterialsDisplay').innerHTML = `<p style="color: #ff3366; font-size: 10px; font-family: Noto Sans, sans-serif;">Error loading materials: ${e.message}</p>`; 
+            }
+        }
+        
+        async function showClassMaterial(level, week) {
+            try {
+                const snap = await db.collection('scheduler_materials').get();
+                let materials = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                
+                // Filter by level and week
+                materials = materials.filter(m => m.level === level && (m.week === week || m.week === parseInt(week)));
+                materials.sort((a, b) => (a.order || 0) - (b.order || 0));
+                
+                const modal = document.createElement('div');
+                modal.className = 'modal-overlay active';
+                modal.id = 'classMaterialModal';
+                modal.innerHTML = `
+                    <div class="modal" style="max-width: 700px; max-height: 80vh; overflow-y: auto;">
+                        <button class="modal-close" onclick="closeClassMaterialModal()">✕</button>
+                        <h3 class="modal-title">📖 ${LEVELS[level]} - Week ${week} Materials</h3>
+                        <p style="font-size: 7px; color: #888; margin-top: 5px;">💡 Click on images to open presentation mode with drawing tools</p>
+                        <div style="margin-top: 15px;">
+                            ${materials.length === 0 ? 
+                                '<p style="color: #888; font-size: 12px; font-family: Noto Sans, sans-serif; text-align: center; padding: 20px;">No materials available for this level and week.</p>' :
+                                materials.map(m => `
+                                    <div class="material-block" style="margin-bottom: 15px;">
+                                        <div class="material-header">
+                                            <span class="material-type">${m.type}</span>
+                                        </div>
+                                        <div class="material-content">${renderTeacherMaterialContent(m)}</div>
+                                    </div>
+                                `).join('')
+                            }
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                
+                // Add click handlers for images after modal is added
+                setTimeout(() => {
+                    const modalEl = document.getElementById('classMaterialModal');
+                    if (modalEl) {
+                        modalEl.querySelectorAll('.clickable-media').forEach(img => {
+                            img.onclick = (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                openPresentationMode(img.src || img.dataset.src, img.dataset.type || 'image');
+                            };
+                        });
+                    }
+                }, 100);
+            } catch (e) {
+                console.error('Error loading class materials:', e);
+                alert('Error loading materials: ' + e.message);
+            }
+        }
+        
+        function renderTeacherMaterialContent(m) {
+            const fontStyle = "font-family: 'Noto Sans', sans-serif; font-size: 12px; line-height: 1.6;";
+            if (m.type === 'text') {
+                // Parse HTML content and make images clickable
+                let content = m.content || '';
+                // Replace img tags with clickable versions
+                content = content.replace(/<img([^>]*)src="([^"]*)"([^>]*)>/gi, 
+                    '<img$1src="$2"$3 class="clickable-media" style="cursor: pointer; max-width: 100%; border-radius: 4px;" title="Click to present">');
+                return `<div style="${fontStyle}">${content}</div>`;
+            }
+            if (m.type === 'link') return `<a href="${m.url}" target="_blank" style="${fontStyle} color: #00ffff;">${m.title || m.url}</a>`;
+            if (m.type === 'image') return `<img src="${m.url}" class="clickable-media" style="max-width: 100%; border-radius: 4px; cursor: pointer;" title="Click to present">`;
+            if (m.type === 'file') {
+                const ext = (m.filename || m.url || '').toLowerCase();
+                if (ext.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i) || m.url?.includes('firebasestorage')) {
+                    return `<img src="${m.url}" class="clickable-media" style="max-width: 100%; border-radius: 4px; cursor: pointer;" title="Click to present"><br><span style="${fontStyle} color: #888;">📁 ${m.filename || 'File'}</span>`;
+                }
+                if (ext.match(/\.pdf$/i)) {
+                    return `<div class="clickable-media" data-src="${m.url}" data-type="pdf" style="background: rgba(255,255,0,0.1); border: 2px solid #ffff00; border-radius: 8px; padding: 20px; text-align: center; cursor: pointer;">
+                        <span style="font-size: 40px;">📄</span>
+                        <p style="${fontStyle} color: #ffff00; margin-top: 10px;">${m.filename || 'PDF Document'}</p>
+                        <p style="font-size: 8px; color: #888;">Click to present</p>
+                    </div>`;
+                }
+                return `<a href="${m.url}" target="_blank" download style="${fontStyle} color: #ffff00;">📁 ${m.filename || 'Download'}</a>`;
+            }
+            return '';
+        }
+        
+        // Presentation Mode Variables
+        let presentationCanvas = null;
+        let presentationCtx = null;
+        let isDrawing = false;
+        let currentTool = 'rainbow';
+        let brushSize = 5;
+        let brushColor = '#ff0000';
+        let rainbowHue = 0;
+        let lastX = 0;
+        let lastY = 0;
+        
+        function openPresentationMode(src, type = 'image') {
+            const overlay = document.createElement('div');
+            overlay.className = 'presentation-overlay';
+            overlay.id = 'presentationMode';
+            
+            overlay.innerHTML = `
+                <div class="presentation-toolbar">
+                    <div class="tool-group">
+                        <button id="toolRainbow" class="active" onclick="setDrawTool('rainbow')" title="Rainbow Pen">🌈 Draw</button>
+                        <button id="toolPen" onclick="setDrawTool('pen')" title="Pen">✏️ Pen</button>
+                        <button id="toolHighlight" onclick="setDrawTool('highlight')" title="Highlighter">🖍️ Highlight</button>
+                        <button id="toolEraser" onclick="setDrawTool('eraser')" title="Eraser">🧹 Erase</button>
+                    </div>
+                    <div class="tool-group">
+                        <label style="color: #fff; font-size: 8px;">Size:</label>
+                        <input type="range" id="brushSizeSlider" min="2" max="30" value="5" onchange="brushSize = this.value">
+                        <input type="color" id="penColorPicker" value="#ff0000" onchange="brushColor = this.value" title="Pen Color">
+                    </div>
+                    <div class="tool-group">
+                        <button onclick="clearCanvas()" title="Clear All">🗑️ Clear</button>
+                        <button onclick="undoCanvas()" title="Undo">↩️ Undo</button>
+                    </div>
+                    <button class="presentation-close" onclick="closePresentationMode()">✕ Close</button>
+                </div>
+                <div class="presentation-content" id="presentationContent">
+                    ${type === 'pdf' ? 
+                        `<iframe src="${src}" style="width: 90%; height: 85vh; border: none; border-radius: 8px;"></iframe>` :
+                        `<img src="${src}" class="presentation-image" id="presentationImage" draggable="false">`
+                    }
+                    <canvas id="presentationCanvas" class="presentation-canvas"></canvas>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            document.body.style.overflow = 'hidden';
+            
+            // Initialize canvas
+            setTimeout(() => {
+                initPresentationCanvas();
+            }, 100);
+        }
+        
+        function initPresentationCanvas() {
+            presentationCanvas = document.getElementById('presentationCanvas');
+            if (!presentationCanvas) return;
+            
+            const content = document.getElementById('presentationContent');
+            presentationCanvas.width = content.offsetWidth;
+            presentationCanvas.height = content.offsetHeight;
+            
+            presentationCtx = presentationCanvas.getContext('2d');
+            presentationCtx.lineCap = 'round';
+            presentationCtx.lineJoin = 'round';
+            
+            // Store states for undo
+            window.canvasStates = [];
+            saveCanvasState();
+            
+            // Mouse events
+            presentationCanvas.addEventListener('mousedown', startDrawing);
+            presentationCanvas.addEventListener('mousemove', draw);
+            presentationCanvas.addEventListener('mouseup', stopDrawing);
+            presentationCanvas.addEventListener('mouseleave', stopDrawing);
+            
+            // Touch events for tablet
+            presentationCanvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            presentationCanvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            presentationCanvas.addEventListener('touchend', stopDrawing);
+            
+            // Resize handler
+            window.addEventListener('resize', resizeCanvas);
+        }
+        
+        function startDrawing(e) {
+            isDrawing = true;
+            [lastX, lastY] = getPosition(e);
+            saveCanvasState();
+        }
+        
+        function draw(e) {
+            if (!isDrawing || !presentationCtx) return;
+            
+            const [x, y] = getPosition(e);
+            
+            presentationCtx.beginPath();
+            presentationCtx.moveTo(lastX, lastY);
+            presentationCtx.lineTo(x, y);
+            
+            if (currentTool === 'rainbow') {
+                rainbowHue = (rainbowHue + 2) % 360;
+                presentationCtx.strokeStyle = `hsl(${rainbowHue}, 100%, 50%)`;
+                presentationCtx.lineWidth = brushSize;
+                presentationCtx.globalAlpha = 1;
+                presentationCtx.globalCompositeOperation = 'source-over';
+            } else if (currentTool === 'pen') {
+                presentationCtx.strokeStyle = brushColor;
+                presentationCtx.lineWidth = brushSize;
+                presentationCtx.globalAlpha = 1;
+                presentationCtx.globalCompositeOperation = 'source-over';
+            } else if (currentTool === 'highlight') {
+                presentationCtx.strokeStyle = brushColor;
+                presentationCtx.lineWidth = brushSize * 3;
+                presentationCtx.globalAlpha = 0.3;
+                presentationCtx.globalCompositeOperation = 'source-over';
+            } else if (currentTool === 'eraser') {
+                presentationCtx.globalCompositeOperation = 'destination-out';
+                presentationCtx.lineWidth = brushSize * 2;
+                presentationCtx.globalAlpha = 1;
+            }
+            
+            presentationCtx.stroke();
+            [lastX, lastY] = [x, y];
+        }
+        
+        function stopDrawing() {
+            isDrawing = false;
+            if (presentationCtx) {
+                presentationCtx.globalAlpha = 1;
+                presentationCtx.globalCompositeOperation = 'source-over';
+            }
+        }
+        
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousedown', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            startDrawing(mouseEvent);
+        }
+        
+        function handleTouchMove(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousemove', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            draw(mouseEvent);
+        }
+        
+        function getPosition(e) {
+            const rect = presentationCanvas.getBoundingClientRect();
+            const x = (e.clientX || e.pageX) - rect.left;
+            const y = (e.clientY || e.pageY) - rect.top;
+            return [x, y];
+        }
+        
+        function setDrawTool(tool) {
+            currentTool = tool;
+            document.querySelectorAll('.presentation-toolbar button').forEach(btn => {
+                if (btn.id && btn.id.startsWith('tool')) {
+                    btn.classList.remove('active');
+                }
+            });
+            const toolBtn = document.getElementById('tool' + tool.charAt(0).toUpperCase() + tool.slice(1));
+            if (toolBtn) toolBtn.classList.add('active');
+        }
+        
+        function saveCanvasState() {
+            if (!presentationCanvas) return;
+            if (window.canvasStates.length > 20) window.canvasStates.shift();
+            window.canvasStates.push(presentationCanvas.toDataURL());
+        }
+        
+        function undoCanvas() {
+            if (!window.canvasStates || window.canvasStates.length <= 1) return;
+            window.canvasStates.pop();
+            const img = new Image();
+            img.onload = () => {
+                presentationCtx.clearRect(0, 0, presentationCanvas.width, presentationCanvas.height);
+                presentationCtx.drawImage(img, 0, 0);
+            };
+            img.src = window.canvasStates[window.canvasStates.length - 1];
+        }
+        
+        function clearCanvas() {
+            if (!presentationCtx || !presentationCanvas) return;
+            saveCanvasState();
+            presentationCtx.clearRect(0, 0, presentationCanvas.width, presentationCanvas.height);
+        }
+        
+        function resizeCanvas() {
+            if (!presentationCanvas) return;
+            const content = document.getElementById('presentationContent');
+            if (!content) return;
+            
+            const imageData = presentationCtx.getImageData(0, 0, presentationCanvas.width, presentationCanvas.height);
+            presentationCanvas.width = content.offsetWidth;
+            presentationCanvas.height = content.offsetHeight;
+            presentationCtx.putImageData(imageData, 0, 0);
+            presentationCtx.lineCap = 'round';
+            presentationCtx.lineJoin = 'round';
+        }
+        
+        function closePresentationMode() {
+            const overlay = document.getElementById('presentationMode');
+            if (overlay) {
+                overlay.remove();
+                document.body.style.overflow = '';
+                window.removeEventListener('resize', resizeCanvas);
+            }
+        }
+        
+        function closeClassMaterialModal() {
+            const modal = document.getElementById('classMaterialModal');
+            if (modal) modal.remove();
         }
 
         // Teacher Classes
@@ -2797,6 +3404,9 @@
                         <div class="class-header">
                             <div><div class="class-day">${c.day}</div><div class="class-time">${c.time} EST</div></div>
                             <span class="level-badge level-${c.level}">${LEVELS[c.level]}</span>
+                        </div>
+                        <div style="margin: 10px 0;">
+                            <button class="btn btn-sm btn-info" onclick="showClassMaterial('${c.level}', ${schedulerSettings.currentWeek})" style="width: 100%;">📖 Show Material (Week ${schedulerSettings.currentWeek})</button>
                         </div>
                         <h4 style="color: #ffff00; font-size: 9px; margin: 10px 0;">Attendance - Week ${schedulerSettings.currentWeek}</h4>
                         <div style="display: grid; gap: 10px;">
